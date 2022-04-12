@@ -7,5 +7,5 @@ scripting, and creating workflows
 ## Example
 Download the Repo and run this to view a Quick Example
 ```
-./settings64.sh --tmux
+./settings64.sh
 ```

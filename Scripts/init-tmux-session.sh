@@ -1,18 +1,18 @@
+#!/bin/bash
 #***********************************************
 #
-#      Filename: init-tmux-session.sh
+#      Filename: /home/cgould/Templates/workflow/workflow-tmux/init-session-tmux.sh
 #
 #        Author: CGOULD - cgould@sdsu.edu
 #   Description: ---
-#        Create: 2022-04-12 11:44:54
-# Last Modified: 2022-04-12 11:44:54
+#        Create: 2022-02-28 18:43:43
+# Last Modified: 2022-02-28 18:43:43
 #***********************************************
 function OpenSessionTrio()
 {
-    tmux new-session \;\
-        split-window -h \;\
-        split-window -v \;\
-        attach
+    # a simple example - not using pane numbering
+    tmux split-window -h \;\
+        split-window -v
 }
 
 function OpenSessionQuad()
@@ -22,28 +22,52 @@ function OpenSessionQuad()
     # |__|__|
     # |__|__|
     #
-    tmux new-session \;\
-        split-window -p 66 \;\
-        split-window -d \;\
-        split-window -h
+    # A simple example using the "active pane"
+    tmux split-window -p 66 \;\
+         split-window -d \;\
+         split-window -h
 }
 
 function OpenSessionEnth()
 {
     #  _____
+    # |__ __|
     # |__|__|
-    # |__|__|
+    # |_____|
     #
-    tmux new-session \; \
-        send-keys 'tail -f /var/log/monitor.log' C-m \; \
-        split-window -v -p 75 \; \
+    # A simple example using pane numbering
+    tmux split-window -v -p 75 \; \
         split-window -h -p 30 \; \
-        send-keys 'neofetch' C-m \; \
         select-pane -t 1 \; \
         split-window -v \; \
-        send-keys 'htop' C-m \;
+        send-keys 'systemctl status' C-m\;
 }
 
-#OpenSessionTrio
-#OpenSessionQuad
-#OpenSessionEnth
+# Set Session Name
+SESSION="[GENERIC-SESSION]"
+SESSIONEXISTS=$(tmux list-sessions | grep $SESSION)
+
+# Only create tmux session if it doesn't already exist
+if [ "$SESSIONEXISTS" = "" ]
+then
+    # Start New Session with our name
+    tmux new-session -d -s $SESSION
+
+    # Name first Window Corresponding to Our Session
+    tmux rename-window -t $SESSION:1 '[GENERAL]'
+
+    # Open Quad Panes ( expects window to be open )
+    OpenSessionQuad
+
+    # Create a New Window Named [Writing]
+    tmux new-window -t $SESSION:2 -n '[CONFIG]'
+    OpenSessionEnth
+
+
+    # Setup an additional Shell for Misc
+    tmux new-window -t $SESSION:3 -n '[MISC]'
+    OpenSessionTrio
+fi
+
+# Attach Session, on the Main window
+tmux attach-session -t $SESSION:1
